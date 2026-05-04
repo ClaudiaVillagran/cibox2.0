@@ -5,7 +5,8 @@ dotenv.config();
 
 const envSchema = z.object({
   UPLOAD_DRIVER: z.enum(["disk", "s3", "cloudinary"]).default("disk"),
-
+  PANTRY_DISCOUNT: z.coerce.number().min(0).max(100).default(0),
+  CIBOX_PLUS_DISCOUNT: z.coerce.number().min(0).max(100).default(0),
   CLOUDINARY_CLOUD_NAME: z.string().default(""),
   CLOUDINARY_API_KEY: z.string().default(""),
   CLOUDINARY_API_SECRET: z.string().default(""),
@@ -28,7 +29,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z
     .string()
     .min(32, "JWT_REFRESH_SECRET debe tener al menos 32 caracteres"),
-  JWT_ACCESS_EXPIRES: z.string().default("30d"),
+  JWT_ACCESS_EXPIRES: z.string().default("15d"),
   JWT_REFRESH_EXPIRES: z.string().default("90d"),
 
   GUEST_ID_SECRET: z

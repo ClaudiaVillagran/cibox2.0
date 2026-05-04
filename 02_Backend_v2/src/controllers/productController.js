@@ -519,7 +519,7 @@ export const getRecommendedProductsForMe = asyncHandler(async (req, res) => {
 
   const objectIds = validIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  console.log("objectIds", objectIds);
+  // //console.log("objectIds", objectIds);
   const referenced = objectIds.length
     ? await Product.find({
         _id: mongoose.trusted({ $in: objectIds }),
@@ -528,7 +528,7 @@ export const getRecommendedProductsForMe = asyncHandler(async (req, res) => {
         .lean()
     : [];
 
-  console.log("referenced", referenced);
+  //console.log("referenced", referenced);
   // Ponderar categorías en memoria
   const categoryCount = {};
   const excluded = new Set();
@@ -542,7 +542,7 @@ export const getRecommendedProductsForMe = asyncHandler(async (req, res) => {
   const sortedCategories = Object.entries(categoryCount)
     .sort((a, b) => b[1] - a[1])
     .map(([cat]) => cat);
-  console.log("sortedCategories", sortedCategories);
+  //console.log("sortedCategories", sortedCategories);
 
   let recommended = [];
   if (sortedCategories.length) {

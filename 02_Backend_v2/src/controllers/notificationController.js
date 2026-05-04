@@ -5,7 +5,7 @@ import { logger } from "../utils/logger.js";
 
 export const listMyNotifications = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  console.log('user from notification',userId);
+  // //console.log('user from notification',userId);
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
   const skip = (page - 1) * limit;
@@ -22,7 +22,7 @@ export const listMyNotifications = asyncHandler(async (req, res) => {
     Notification.countDocuments(filter),
     Notification.countDocuments({ user_id: userId, is_read: false }),
   ]);
-  console.log(items);
+  // //console.log(items);
   return res.status(200).json({
     success: true,
     data: {

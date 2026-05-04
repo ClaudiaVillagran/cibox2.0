@@ -40,7 +40,7 @@ const run = async () => {
     })
     .toArray();
 
-  console.log(`Productos encontrados: ${products.length}`);
+  //console.log(`Productos encontrados: ${products.length}`);
 
   for (const product of products) {
     try {
@@ -52,7 +52,7 @@ const run = async () => {
         const imageUrl = currentImages[i];
 
         if (isWpImage(imageUrl)) {
-          console.log(`Subiendo imagen: ${imageUrl}`);
+          //console.log(`Subiendo imagen: ${imageUrl}`);
           const newUrl = await uploadRemoteToCloudinary(
             imageUrl,
             product._id,
@@ -67,7 +67,7 @@ const run = async () => {
       let newThumbnail = product.thumbnail;
 
       if (isWpImage(product.thumbnail)) {
-        console.log(`Subiendo thumbnail: ${product.thumbnail}`);
+        //console.log(`Subiendo thumbnail: ${product.thumbnail}`);
         newThumbnail = await uploadRemoteToCloudinary(
           product.thumbnail,
           product._id,
@@ -85,13 +85,13 @@ const run = async () => {
         },
       );
 
-      console.log(`✅ Actualizado: ${product.name}`);
+      //console.log(`✅ Actualizado: ${product.name}`);
     } catch (error) {
-      console.log(`❌ Error en ${product.name}:`, error.message);
+      //console.log(`❌ Error en ${product.name}:`, error.message);
     }
   }
 
-  console.log("Migración terminada");
+  //console.log("Migración terminada");
   process.exit(0);
 };
 

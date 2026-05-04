@@ -7,7 +7,7 @@ dotenv.config();
 const run = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ DB conectada");
+    //console.log("✅ DB conectada");
 
     await Coupon.updateOne(
       { code: "BIENVENIDA10" },
@@ -28,7 +28,7 @@ const run = async () => {
       { upsert: true }
     );
 
-    console.log("🎉 Cupón creado/actualizado correctamente");
+    //console.log("🎉 Cupón creado/actualizado correctamente");
 
     process.exit(0);
   } catch (error) {

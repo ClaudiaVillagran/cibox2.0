@@ -150,7 +150,7 @@ El proceso falla en boot si faltan variables o los secretos son menores a 32 car
 
 **Ownership guest:** usar helpers `getRequestIdentity`, `getOwnerFilter`, `assertOwner`. Jamás confiar en `req.headers["x-guest-id"]` sin pasar por `verifyGuestId`.
 
-**Logging:** siempre `logger.info/warn/error` con objeto estructurado. Nunca `console.log`.
+**Logging:** siempre `logger.info/warn/error` con objeto estructurado. Nunca `//console.log`.
 
 **Lean:** todas las lecturas con `.lean()` salvo que se vaya a mutar.
 

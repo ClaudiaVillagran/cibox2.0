@@ -1,7 +1,7 @@
 import { BadRequestError } from "../utils/errors.js";
-
-const PANTRY_DISCOUNT_PERCENT = Number(process.env.PANTRY_DISCOUNT || 0);
-const CIBOX_PLUS_DISCOUNT_PERCENT = Number(process.env.CIBOX_PLUS_DISCOUNT || 0);
+import { env } from "../config/env.js";
+const PANTRY_DISCOUNT_PERCENT = env.PANTRY_DISCOUNT;
+const CIBOX_PLUS_DISCOUNT_PERCENT = env.CIBOX_PLUS_DISCOUNT;
 
 export const getPriceTierByQuantity = (tiers, quantity) => {
   if (!Array.isArray(tiers) || tiers.length === 0) {

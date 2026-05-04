@@ -60,7 +60,7 @@ export const resendVerification = asyncHandler(async (req, res) => {
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-    console.log("BODY RECIBIDO:", req.body);
+    // //console.log("BODY RECIBIDO:", req.body);
   await authService.requestPasswordReset(req.body.email);
   // Siempre 200 — anti-enumeration
   res.status(200).json({

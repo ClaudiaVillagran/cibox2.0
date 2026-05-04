@@ -49,7 +49,7 @@ const boxItems = [
 const run = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ DB conectada");
+    //console.log("✅ DB conectada");
 
     const baseBox = await Product.findById(BASE_BOX_ID).lean();
 
@@ -80,8 +80,8 @@ const run = async () => {
 
     const product = await Product.create(payload);
 
-    console.log("✅ CIBOX Premium creada:");
-    console.log(product._id.toString());
+    //console.log("✅ CIBOX Premium creada:");
+    //console.log(product._id.toString());
 
     process.exit(0);
   } catch (error) {

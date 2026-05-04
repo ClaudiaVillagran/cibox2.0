@@ -28,7 +28,7 @@ const buildSessionId = ({ userId, guestId, orderId }) => {
  */
 export const createWebpayTransaction = async ({ order, platform }) => {
   if (!order) throw new NotFoundError("Orden no encontrada");
-  console.log("order from create webpay", order);
+  //console.log("order from create webpay", order);
   if (order.status !== ORDER_STATUS.PENDING) {
     throw new ConflictError(
       "Solo se puede pagar una orden en estado pendiente",
@@ -55,8 +55,8 @@ export const createWebpayTransaction = async ({ order, platform }) => {
   }
 
   const tx = getTransaction();
-  console.log("WEBPAY RETURN URL ENVIADA A TRANSBANK:", webpayReturnUrl);
-  console.log("WEBPAY PLATFORM RECIBIDA:", platform);
+  //console.log("WEBPAY RETURN URL ENVIADA A TRANSBANK:", webpayReturnUrl);
+  //console.log("WEBPAY PLATFORM RECIBIDA:", platform);
   const response = await tx.create(
     buyOrder,
     sessionId,
@@ -102,62 +102,62 @@ export const createWebpayTransaction = async ({ order, platform }) => {
 export const commitWebpayTransaction = async ({ token }) => {
   if (!token) throw new BadRequestError("Token requerido");
 
-  // Lock optimista: tomar la orden solo si está en estado pre-commit.
   const lockable = [
     "processing",
     PAYMENT_STATUS.PENDING,
     PAYMENT_STATUS.PROCESSING,
   ];
 
-  const current = await Order.findOne({ "payment.token": token });
+  // Lock atómico: solo una request puede cambiar el estado
+  const locked = await Order.findOneAndUpdate(
+    {
+      "payment.token": token,
+      "payment.status": { $in: lockable },
+    },
+    {
+      $set: {
+        "payment.status": PAYMENT_STATUS.PROCESSING,
+        "payment.processing_started_at": new Date(),
+      },
+    },
+    { new: true },
+  );
 
-  if (!current) {
-    throw new NotFoundError("Orden no encontrada para el token");
-  }
+  if (!locked) {
+    const existing = await Order.findOne({ "payment.token": token });
 
-  if (!lockable.includes(current.payment?.status)) {
+    if (!existing) {
+      throw new NotFoundError("Orden no encontrada para el token");
+    }
+
     logger.info(
       {
-        orderId: String(current._id),
-        paymentStatus: current.payment?.status,
-        orderStatus: current.status,
+        orderId: String(existing._id),
+        paymentStatus: existing.payment?.status,
+        orderStatus: existing.status,
       },
-      "commitWebpayTransaction: idempotente — ya procesada",
+      "commitWebpayTransaction: idempotente — ya procesada o en proceso",
     );
-    return current;
+
+    return existing;
   }
 
-  current.payment.status = PAYMENT_STATUS.PROCESSING;
-  const locked = await current.save();
-
-  // if (!locked) {
-  //   // No pudo bloquear: ya fue confirmada o cancelada.
-  //   const existing = await Order.findOne({ "payment.token": token });
-  //   if (!existing) throw new NotFoundError("Orden no encontrada para el token");
-  //   logger.info(
-  //     {
-  //       orderId: String(existing._id),
-  //       paymentStatus: existing.payment?.status,
-  //       orderStatus: existing.status,
-  //     },
-  //     "commitWebpayTransaction: idempotente — ya procesada",
-  //   );
-  //   return existing;
-  // }
-
   let response;
+
   try {
     const tx = getTransaction();
     response = await tx.commit(token);
   } catch (err) {
-    // Liberar el lock como rejected si falla la llamada
     locked.payment.status = PAYMENT_STATUS.REJECTED;
     locked.payment.transaction_date = new Date();
+    locked.payment.error_message = err.message;
     await locked.save();
+
     logger.error(
       { orderId: String(locked._id), err: err.message },
       "Webpay commit falló",
     );
+
     throw err;
   }
 
@@ -168,7 +168,6 @@ export const commitWebpayTransaction = async ({ token }) => {
   const responseAmount = Math.round(Number(response?.amount || 0));
   const amountMatches = responseAmount === expectedAmount;
 
-  // Persistir respuesta
   locked.payment.authorization_code = response?.authorization_code || null;
   locked.payment.transaction_date = response?.transaction_date
     ? new Date(response.transaction_date)
@@ -202,17 +201,22 @@ export const commitWebpayTransaction = async ({ token }) => {
         "Webpay rechazó la transacción",
       );
     }
+
     return locked;
   }
 
-  // Autorizado y monto correcto → finalizar (idempotente)
+  locked.payment.status = PAYMENT_STATUS.PAID;
+  await locked.save();
+
   await finalizePaidOrder(locked._id);
 
   const refreshed = await Order.findById(locked._id);
+
   logger.info(
     { orderId: String(refreshed._id), total: refreshed.total },
     "Webpay commit aprobado y orden finalizada",
   );
+
   return refreshed;
 };
 

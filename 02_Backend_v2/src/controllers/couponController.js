@@ -105,10 +105,10 @@ export const checkoutCouponPreview = asyncHandler(async (req, res) => {
   const userId = req.user?.id || null;
   const subtotal = Number(req.body?.subtotal || 0);
 
-  console.log("PREVIEW INPUT:", {
-    userId,
-    subtotal,
-  });
+  // //console.log("PREVIEW INPUT:", {
+  //   userId,
+  //   subtotal,
+  // });
 
   if (!userId || subtotal <= 0) {
     return res.status(200).json({

@@ -33,7 +33,7 @@ const items = [
 const run = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ DB conectada");
+    //console.log("✅ DB conectada");
 
     const boxItems = items.map((item) => ({
       product_id: new mongoose.Types.ObjectId(item.product_id),
@@ -51,8 +51,8 @@ const run = async () => {
       { new: true }
     );
 
-    console.log("✅ Caja actualizada:");
-    console.log(result);
+    //console.log("✅ Caja actualizada:");
+    //console.log(result);
 
     process.exit(0);
   } catch (error) {

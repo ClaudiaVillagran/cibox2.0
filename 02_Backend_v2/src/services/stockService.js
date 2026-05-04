@@ -10,7 +10,7 @@ export const decrementStockAtomic = async ({ productId, quantity }, session) => 
     throw new ConflictError("Cantidad inválida para descontar stock");
   }
 
-  const updated = await Product.collection.findOneAndUpdate(
+  const updatedProduct = await Product.findOneAndUpdate(
     {
       _id: productId,
       is_active: true,
@@ -20,12 +20,10 @@ export const decrementStockAtomic = async ({ productId, quantity }, session) => 
       $inc: { stock: -qty },
     },
     {
-      returnDocument: "after",
-      session,
-    }
+      new: true,
+      session: session || null,
+    },
   );
-
-  const updatedProduct = updated?.value || updated;
 
   if (!updatedProduct) {
     const product = await Product.findById(productId)
@@ -42,11 +40,11 @@ export const decrementStockAtomic = async ({ productId, quantity }, session) => 
 
     logger.warn(
       { productId, requested: qty, available: product.stock },
-      "stock insuficiente al descontar"
+      "stock insuficiente al descontar",
     );
 
     throw new ConflictError(
-      `Stock insuficiente para ${product.name} (disponible: ${product.stock}, requerido: ${qty})`
+      `Stock insuficiente para ${product.name} (disponible: ${product.stock}, requerido: ${qty})`,
     );
   }
 
